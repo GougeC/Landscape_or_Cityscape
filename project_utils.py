@@ -18,6 +18,12 @@ from keras.applications import VGG16,vgg16
 from keras.applications import ResNet50, resnet50
 from keras.applications import InceptionV3, inception_v3
 
+def preprocess_IV3(x):
+    x /= 255.
+    x -= 0.5
+    x *= 2.
+    return x
+
 
 def prep_for_model(path, model):
     img = image.load_img(path, target_size = (224, 224) )
@@ -25,10 +31,8 @@ def prep_for_model(path, model):
     x = np.expand_dims(x, axis = 0)
     if model == 'vgg16':
         x = vgg16.preprocess_input(x, mode='tf')
-    elif model == 'inception_v3':
-        x = inception_v3.preprocess_input(x, mode='tf')
-    else: 
-        x = resnet50.preprocess_input(x, mode='tf')
+    else:
+        x = preprocess_IV3(x)
     return x
 
 def get_test(suffix,model):

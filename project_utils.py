@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import keras
-
+from sklearn.metrics import roc_auc_score
 from sklearn.metrics import f1_score
 #keras specific imports
 from keras import Model, Input
@@ -24,15 +24,28 @@ def preprocess_IV3(x):
     x *= 2.
     return x
 
+def evaluate_and_confusion_matrix(X_test,y_test,model):
+    ev = model.evaluate(X_test,y_test)
+    print("accuracy: {}, loss: {} ".format(ev[1],ev[0]))
+    preds = model.predict(X_test)
+    roc_auc = roc_auc_score(y_test,preds)
+    print("ROC AUC score: {}".format(roc_auc))
+    conf_matrix = create_confusion_matrix(y_test,preds,{0:'city',1:'earth'})
+    print(conf_matrix)
+
 
 def prep_for_model(path, model):
+    ''' preprocesses the image at the given path for the model specified
+    '''
     img = image.load_img(path, target_size = (224, 224) )
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis = 0)
     if model == 'vgg16':
         x = vgg16.preprocess_input(x, mode='tf')
-    else:
-        x = preprocess_IV3(x)
+    elif model== 'inception_v3':
+        x = inception_v3.preprocess_input(x)
+    elif model== 'resnet50':
+        x = resnet50.preprocess_input(x,mode = 'tf')
     return x
 
 def get_test(suffix,model):
@@ -71,12 +84,11 @@ def create_confusion_matrix(y_true,predictions,sub_mapping):
     index = [sub_mapping[x] for x in range(num_classes)]
     con_table = pd.DataFrame(con_matrix,index = index,columns = index)
     row_summations = con_table.T.sum()
-    print("columns are actual, rows are predicted")
     con_table['totals'] = row_summations
     col_sums = con_table.sum()
     con_table =con_table.T
     con_table['totals'] = col_sums
-    print("f1 score, macro: ",f1_score(true_classes,prediction_classes,average = 'macro'))
-    print("f1 score, weighted: ",f1_score(true_classes,prediction_classes,average='weighted'))
-    print("f1 score, micro: ",f1_score(true_classes,prediction_classes,average = 'micro'))
+    print("f1 score: ",f1_score(true_classes,prediction_classes))
+    print("columns are actual, rows are predicted")
+
     return con_table.T

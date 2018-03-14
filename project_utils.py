@@ -9,60 +9,48 @@ from sklearn.metrics import f1_score
 #keras specific imports
 from keras import Model, Input
 from keras.layers import Dense, Flatten,GlobalMaxPool2D
-from keras.models import Sequential
 from keras.preprocessing import image
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import EarlyStopping
 
 from keras.applications import VGG16,vgg16
-from keras.applications import ResNet50, resnet50
-from keras.applications import InceptionV3, inception_v3
 
-def preprocess_IV3(x):
-    x /= 255.
-    x -= 0.5
-    x *= 2.
-    return x
 
-def evaluate_and_confusion_matrix(X_test,y_test,model):
+def evaluate_and_confusion_matrix(X_test,y_test,model, print_res = True):
     ev = model.evaluate(X_test,y_test)
-    print("accuracy: {}, loss: {} ".format(ev[1],ev[0]))
+    if print_res:
+        print("accuracy: {}, loss: {} ".format(ev[1],ev[0]))
     preds = model.predict(X_test)
     roc_auc = roc_auc_score(y_test,preds)
-    print("ROC AUC score: {}".format(roc_auc))
+    if print(print_res):
+        print("ROC AUC score: {}".format(roc_auc))
     conf_matrix = create_confusion_matrix(y_test,preds,{0:'city',1:'earth'})
-    print(conf_matrix)
+    if print_res:
+        print(conf_matrix)
+    return roc_auc  
 
 
-def prep_for_model(path, model):
+def prep_for_model(path):
     ''' preprocesses the image at the given path for the model specified
     '''
     img = image.load_img(path, target_size = (224, 224) )
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis = 0)
-    if model == 'vgg16':
-        x = vgg16.preprocess_input(x, mode='tf')
-    elif model== 'inception_v3':
-        x = inception_v3.preprocess_input(x)
-    elif model== 'resnet50':
-        x = resnet50.preprocess_input(x,mode = 'tf')
+    x = vgg16.preprocess_input(x, mode='tf')
     return x
 
-def get_test(suffix,model):
-    '''Creates a test set from a folder I set aside to test results after modeling
-model names are 'vgg16', 'inception_v3' and 'resnet50'
-    
+def get_test(suffix = "_3_10"):
+    '''Creates a test set from a folder I set aside to test results after modeling   
     '''
     
     earthpaths = os.listdir(path='./images/test/earthporn'+suffix)
     citypaths = os.listdir(path='./images/test/cityporn'+suffix)
     X_test, y_test = [],[]
     for path in citypaths:
-        x = prep_for_model('images/test/cityporn'+suffix+'/'+path,model)
+        x = prep_for_model('images/test/cityporn'+suffix+'/'+path)
         X_test.append(x.reshape(224,224,3))
         y_test.append(0)
     for path in earthpaths:
-        x = prep_for_model('images/test/earthporn'+suffix+'/'+path,model)
+        x = prep_for_model('images/test/earthporn'+suffix+'/'+path)
         X_test.append(x.reshape(224,224,3))
         y_test.append(1)
     X_test, y_test = np.array(X_test), keras.utils.to_categorical(np.array(y_test))
@@ -88,7 +76,8 @@ def create_confusion_matrix(y_true,predictions,sub_mapping):
     col_sums = con_table.sum()
     con_table =con_table.T
     con_table['totals'] = col_sums
-    print("f1 score: ",f1_score(true_classes,prediction_classes))
-    print("columns are actual, rows are predicted")
+    f1 = f1_score(true_classes,prediction_classes)
+    #print("f1 score: {}".format(f1))
+    #print("columns are actual, rows are predicted")
 
     return con_table.T

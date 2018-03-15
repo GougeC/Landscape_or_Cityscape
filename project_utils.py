@@ -16,6 +16,8 @@ from keras.applications import VGG16,vgg16
 
 
 def evaluate_and_confusion_matrix(X_test,y_test,model, print_res = True):
+    """Makes a confusion matrix for the given test set and model and does some basic metrics
+    """
     ev = model.evaluate(X_test,y_test)
     if print_res:
         print("accuracy: {}, loss: {} ".format(ev[1],ev[0]))
@@ -38,19 +40,19 @@ def prep_for_model(path):
     x = vgg16.preprocess_input(x, mode='tf')
     return x
 
-def get_test(suffix = "_3_10"):
+def get_test():
     '''Creates a test set from a folder I set aside to test results after modeling   
     '''
     
-    earthpaths = os.listdir(path='./images/test/earthporn'+suffix)
-    citypaths = os.listdir(path='./images/test/cityporn'+suffix)
+    earthpaths = os.listdir(path='./images/test/earthporn_3_10')
+    citypaths = os.listdir(path='./images/test/cityporn_3_10')
     X_test, y_test = [],[]
     for path in citypaths:
-        x = prep_for_model('images/test/cityporn'+suffix+'/'+path)
+        x = prep_for_model('images/test/cityporn_3_10/'+path)
         X_test.append(x.reshape(224,224,3))
         y_test.append(0)
     for path in earthpaths:
-        x = prep_for_model('images/test/earthporn'+suffix+'/'+path)
+        x = prep_for_model('images/test/earthporn_3_10/'+path)
         X_test.append(x.reshape(224,224,3))
         y_test.append(1)
     X_test, y_test = np.array(X_test), keras.utils.to_categorical(np.array(y_test))

@@ -21,12 +21,12 @@ def evaluate_and_confusion_matrix(X_test,y_test,model, print_res = True):
         print("accuracy: {}, loss: {} ".format(ev[1],ev[0]))
     preds = model.predict(X_test)
     roc_auc = roc_auc_score(y_test,preds)
-    if print(print_res):
+    if print_res:
         print("ROC AUC score: {}".format(roc_auc))
     conf_matrix = create_confusion_matrix(y_test,preds,{0:'city',1:'earth'})
     if print_res:
         print(conf_matrix)
-    return roc_auc  
+    return roc_auc, ev[1],ev[0]
 
 
 def prep_for_model(path):

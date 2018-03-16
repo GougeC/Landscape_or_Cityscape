@@ -108,6 +108,8 @@ if __name__ == '__main__':
     python gather_subreddit.py earthporn 1/1/2017 100
 
     would save every direct link image from r/earthporn that had over 100 upvotes.
+
+    This requires you to have a REDDIT_API_ID and REDDIT_API_SECRET enviroment variables that are your reddit api keys
     """
     TODAY = datetime.datetime.today()
     subreddit,date,minimum_upvotes = sys.argv[1],sys.argv[2],int(sys.argv[3])

@@ -28,7 +28,7 @@ def get_and_save_sub_images(TODAY, subreddit, date, min_votes):
     print("saving {} images to {} ".format(len(urls),folder))
     i = 0
     for ind, url in enumerate(urls):
-
+        #Alter this code if you want to change the size of the test/validation sets
         if i%10 == 9:
             fol = 'test'
         elif i%10 == 8:

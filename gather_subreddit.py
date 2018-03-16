@@ -9,12 +9,12 @@ import numpy as np
 import sys
 from scipy.misc import imread
 
-def get_and_save_sub_images(subreddit, date, min_votes):
+
+def get_and_save_sub_images(TODAY, subreddit, date, min_votes):
     '''saves images from the given subreddit since date (d/m/y) with >= min_votes in a folder named subreddit_[day]_month'''
     folders = []
     urls = get_urls(subreddit, date, min_votes)
-    today = datetime.datetime.today()
-    month,day = today.month, today.day
+    month,day = TODAY.month, TODAY.day
     if not os.path.exists("images_{}_{}".format(month,day)):
         os.mkdir("images_{}_{}".format(month,day))
     for fol in ['train','test','validation']:
@@ -78,8 +78,10 @@ def get_multiple_subreddits(subreddit_dict):
         and minimum_upvotes is the number of upvotes that a post most have to be included
     """
     folders = []
+    TODAY = datetime.datetime.today()
+
     for sub, info in subreddit_dict.items():
-        fol = get_and_save_sub_images(sub, info[0], info[1])
+        fol = get_and_save_sub_images(TODAY,sub, info[0], info[1])
         folders.extend(fol)
 
 def eliminate_broken_images(folders):
@@ -107,7 +109,8 @@ if __name__ == '__main__':
 
     would save every direct link image from r/earthporn that had over 100 upvotes.
     """
+    TODAY = datetime.datetime.today()
     subreddit,date,minimum_upvotes = sys.argv[1],sys.argv[2],int(sys.argv[3])
-    folders = get_and_save_sub_images(subreddit,date,minimum_upvotes)
+    folders = get_and_save_sub_images(TODAY,subreddit,date,minimum_upvotes)
     eliminate_broken_images(folders)
     print("finished.")
